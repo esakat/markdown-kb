@@ -8,13 +8,6 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-// Document represents a parsed Markdown document with frontmatter.
-type Document struct {
-	Path        string
-	Frontmatter map[string]any
-	Body        string
-}
-
 // ParseFrontmatter reads YAML frontmatter from a Markdown file.
 // It stops reading as soon as the closing --- is found (fast path).
 func ParseFrontmatter(r io.Reader) (map[string]any, string, error) {
