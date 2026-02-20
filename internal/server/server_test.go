@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -435,6 +437,93 @@ func TestHandleListDocuments_Page2(t *testing.T) {
 	data, _ := body["data"].([]any)
 	if len(data) != 1 {
 		t.Errorf("expected 1 document on page 2 (3 total, limit 2), got %d", len(data))
+	}
+}
+
+func TestHandleTree(t *testing.T) {
+	_, ts := newTestServer(t)
+
+	resp, err := http.Get(ts.URL + "/api/v1/tree")
+	if err != nil {
+		t.Fatalf("GET /api/v1/tree error = %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+
+	var body map[string]any
+	json.NewDecoder(resp.Body).Decode(&body)
+
+	data, ok := body["data"].(map[string]any)
+	if !ok {
+		t.Fatal("expected 'data' to be an object (tree root)")
+	}
+
+	if data["type"] != "dir" {
+		t.Errorf("root type = %v, want 'dir'", data["type"])
+	}
+
+	children, ok := data["children"].([]any)
+	if !ok {
+		t.Fatal("expected 'children' to be an array")
+	}
+	if len(children) != 3 {
+		t.Errorf("expected 3 root children, got %d", len(children))
+	}
+}
+
+func TestHandleRawFile(t *testing.T) {
+	// Create a temporary directory with a test file
+	tmpDir := t.TempDir()
+	testContent := []byte("test image content")
+	os.MkdirAll(filepath.Join(tmpDir, "images"), 0o755)
+	os.WriteFile(filepath.Join(tmpDir, "images", "test.png"), testContent, 0o644)
+
+	store, err := index.New()
+	if err != nil {
+		t.Fatalf("index.New() error = %v", err)
+	}
+	t.Cleanup(func() { store.Close() })
+
+	cfg := config.ServeConfig{Port: 0, RootDir: tmpDir}
+	srv := New(cfg, store)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	resp, err := http.Get(ts.URL + "/api/v1/raw/images/test.png")
+	if err != nil {
+		t.Fatalf("GET /api/v1/raw/images/test.png error = %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+}
+
+func TestHandleRawFile_PathTraversal(t *testing.T) {
+	tmpDir := t.TempDir()
+	store, err := index.New()
+	if err != nil {
+		t.Fatalf("index.New() error = %v", err)
+	}
+	t.Cleanup(func() { store.Close() })
+
+	cfg := config.ServeConfig{Port: 0, RootDir: tmpDir}
+	srv := New(cfg, store)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	resp, err := http.Get(ts.URL + "/api/v1/raw/../../../etc/passwd")
+	if err != nil {
+		t.Fatalf("GET error = %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		t.Error("path traversal should be rejected")
 	}
 }
 

@@ -4,12 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/esakat/markdown-kb/internal/config"
 	"github.com/esakat/markdown-kb/internal/index"
+	"github.com/esakat/markdown-kb/web"
 )
 
 var version = "dev"
@@ -43,7 +47,16 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/search", s.handleSearch)
 	s.mux.HandleFunc("GET /api/v1/tags", s.handleListTags)
 	s.mux.HandleFunc("GET /api/v1/metadata/fields", s.handleMetadataFields)
+	s.mux.HandleFunc("GET /api/v1/tree", s.handleTree)
+	s.mux.HandleFunc("GET /api/v1/raw/{path...}", s.handleRawFile)
 	s.mux.HandleFunc("GET /api/health", s.handleHealth)
+
+	// SPA catch-all (lowest priority in ServeMux)
+	sub, err := fs.Sub(web.DistFS, "dist")
+	if err != nil {
+		sub = web.DistFS
+	}
+	s.mux.Handle("GET /", spaHandler(sub))
 }
 
 // Handler returns the HTTP handler with CORS middleware.
@@ -235,4 +248,45 @@ func (s *Server) handleMetadataFields(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"data": fields})
+}
+
+func (s *Server) handleTree(w http.ResponseWriter, r *http.Request) {
+	entries, err := s.store.ListPaths()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to build tree")
+		return
+	}
+
+	tree := index.BuildTree(entries)
+	writeJSON(w, http.StatusOK, map[string]any{"data": tree})
+}
+
+func (s *Server) handleRawFile(w http.ResponseWriter, r *http.Request) {
+	filePath := r.PathValue("path")
+	if filePath == "" {
+		writeError(w, http.StatusBadRequest, "path is required")
+		return
+	}
+
+	// Prevent path traversal
+	if strings.Contains(filePath, "..") {
+		writeError(w, http.StatusBadRequest, "invalid path")
+		return
+	}
+
+	fullPath := filepath.Join(s.cfg.RootDir, filepath.FromSlash(filePath))
+
+	// Verify the resolved path is within RootDir
+	absRoot, err := filepath.Abs(s.cfg.RootDir)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+	absPath, err := filepath.Abs(fullPath)
+	if err != nil || !strings.HasPrefix(absPath, absRoot) {
+		writeError(w, http.StatusBadRequest, "invalid path")
+		return
+	}
+
+	http.ServeFile(w, r, fullPath)
 }

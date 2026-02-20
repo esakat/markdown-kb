@@ -1,0 +1,11 @@
+.root {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.empty {
+  padding: 16px;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
