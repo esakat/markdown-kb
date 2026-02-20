@@ -34,3 +34,50 @@ export interface TagCount {
   tag: string;
   count: number;
 }
+
+export interface SearchResult {
+  path: string;
+  title: string;
+  snippet: string;
+  score: number;
+  meta: Record<string, unknown>;
+}
+
+export interface MetadataField {
+  name: string;
+  type: string;
+  values: string[];
+}
+
+export interface GitCommit {
+  hash: string;
+  author: string;
+  date: string;
+  message: string;
+}
+
+export interface BlameLine {
+  hash: string;
+  author: string;
+  date: string;
+  line_no: number;
+  content: string;
+}
+
+export interface GraphNode {
+  path: string;
+  title: string;
+  tags: string[];
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  type: "link" | "tag";
+  label?: string;
+}
+
+export interface GraphData {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}

@@ -444,6 +444,76 @@ func TestIndexDocument_WithNumberAndBoolMeta(t *testing.T) {
 	}
 }
 
+func TestListDocumentsWithFilter_StatusOnly(t *testing.T) {
+	store := newTestStore(t)
+	indexSampleDocs(t, store)
+
+	docs, total, err := store.ListDocumentsWithFilter(map[string]string{"status": "published"}, 10, 0)
+	if err != nil {
+		t.Fatalf("ListDocumentsWithFilter() error = %v", err)
+	}
+	if total != 2 {
+		t.Errorf("total = %d, want 2 (guide.md + japanese.md)", total)
+	}
+	for _, d := range docs {
+		status, _ := d.Meta["status"].(string)
+		if status != "published" {
+			t.Errorf("expected status=published, got %q for %q", status, d.Path)
+		}
+	}
+}
+
+func TestListDocumentsWithFilter_TagOnly(t *testing.T) {
+	store := newTestStore(t)
+	indexSampleDocs(t, store)
+
+	docs, total, err := store.ListDocumentsWithFilter(map[string]string{"tags": "go"}, 10, 0)
+	if err != nil {
+		t.Fatalf("ListDocumentsWithFilter() error = %v", err)
+	}
+	if total != 2 {
+		t.Errorf("total = %d, want 2 (guide.md + api.md)", total)
+	}
+	if len(docs) != 2 {
+		t.Errorf("got %d docs, want 2", len(docs))
+	}
+}
+
+func TestListDocumentsWithFilter_StatusAndTag(t *testing.T) {
+	store := newTestStore(t)
+	indexSampleDocs(t, store)
+
+	docs, total, err := store.ListDocumentsWithFilter(map[string]string{"status": "published", "tags": "go"}, 10, 0)
+	if err != nil {
+		t.Fatalf("ListDocumentsWithFilter() error = %v", err)
+	}
+	if total != 1 {
+		t.Errorf("total = %d, want 1 (only guide.md is published+go)", total)
+	}
+	if len(docs) != 1 {
+		t.Errorf("got %d docs, want 1", len(docs))
+	}
+	if len(docs) > 0 && docs[0].Path != "guide.md" {
+		t.Errorf("expected guide.md, got %q", docs[0].Path)
+	}
+}
+
+func TestListDocumentsWithFilter_EmptyFilters(t *testing.T) {
+	store := newTestStore(t)
+	indexSampleDocs(t, store)
+
+	docs, total, err := store.ListDocumentsWithFilter(nil, 10, 0)
+	if err != nil {
+		t.Fatalf("ListDocumentsWithFilter() error = %v", err)
+	}
+	if total != 3 {
+		t.Errorf("total = %d, want 3 (all docs)", total)
+	}
+	if len(docs) != 3 {
+		t.Errorf("got %d docs, want 3", len(docs))
+	}
+}
+
 func TestNewWithPath(t *testing.T) {
 	dbPath := t.TempDir() + "/test.db"
 	store, err := NewWithPath(dbPath)

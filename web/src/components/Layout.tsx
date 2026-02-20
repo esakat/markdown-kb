@@ -1,14 +1,16 @@
 import { useState } from "preact/hooks";
 import type { ComponentChildren } from "preact";
 import { Sidebar } from "./Sidebar/Sidebar";
+import { SearchBar } from "./Search/SearchBar";
 import styles from "./Layout.module.css";
 
 interface Props {
   currentPath?: string;
+  onSearch?: (query: string) => void;
   children: ComponentChildren;
 }
 
-export function Layout({ currentPath, children }: Props) {
+export function Layout({ currentPath, onSearch, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -22,17 +24,26 @@ export function Layout({ currentPath, children }: Props) {
         >
           ☰
         </button>
-        <h1 class={styles.title}>Markdown KB</h1>
+        <h1 class={styles.title}>
+          <a href="/" style={{ color: "inherit", textDecoration: "none" }}>
+            Markdown KB
+          </a>
+        </h1>
+        <nav class={styles.nav}>
+          <a href="/graph" class={styles.navLink}>
+            Graph
+          </a>
+        </nav>
+        {onSearch && <SearchBar onSearch={onSearch} />}
       </header>
       <div class={styles.body}>
-        <div class={`${styles.sidebarWrapper} ${sidebarOpen ? styles.open : ""}`}>
+        <div
+          class={`${styles.sidebarWrapper} ${sidebarOpen ? styles.open : ""}`}
+        >
           <Sidebar currentPath={currentPath} />
         </div>
         {sidebarOpen && (
-          <div
-            class={styles.overlay}
-            onClick={() => setSidebarOpen(false)}
-          />
+          <div class={styles.overlay} onClick={() => setSidebarOpen(false)} />
         )}
         <main class={styles.main}>{children}</main>
       </div>

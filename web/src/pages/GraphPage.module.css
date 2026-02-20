@@ -1,0 +1,62 @@
+.page {
+  padding: 0 1rem;
+}
+
+.subtitle {
+  color: #666;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.5rem;
+}
+
+.sidebar {
+  border-right: 1px solid var(--color-border, #e0e0e0);
+  padding-right: 1rem;
+}
+
+.sidebar h2 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.graphArea {
+  min-height: 500px;
+}
+
+.legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legendLine {
+  display: inline-block;
+  width: 24px;
+  border-top-width: 2px;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border, #e0e0e0);
+    padding-right: 0;
+    padding-bottom: 1rem;
+  }
+}

@@ -1,0 +1,123 @@
+.panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-top: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  user-select: none;
+}
+
+.header:hover {
+  background: var(--color-bg-secondary);
+}
+
+.headerTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toggle {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s;
+}
+
+.toggleOpen {
+  transform: rotate(90deg);
+}
+
+.list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.commitItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.85rem;
+}
+
+.commitItem:last-child {
+  border-bottom: none;
+}
+
+.commitDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.commitBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.commitMessage {
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.commitMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.commitHash {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.diffBtn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.diffBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.empty {
+  padding: 16px 14px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.loading {
+  padding: 16px 14px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.selectedPair {
+  background: var(--color-primary-light);
+}

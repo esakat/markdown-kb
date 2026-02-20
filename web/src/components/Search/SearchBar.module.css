@@ -1,0 +1,112 @@
+.wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 480px;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  padding: 0 10px;
+  gap: 6px;
+  transition: border-color 0.15s;
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+.icon {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.input {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 6px 0;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  outline: none;
+  font-family: var(--font-sans);
+  min-width: 0;
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 2px;
+  font-size: 0.8rem;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+.clearBtn:hover {
+  color: var(--color-text);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  z-index: 200;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.clearHistoryBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  padding: 0;
+}
+
+.clearHistoryBtn:hover {
+  color: var(--color-primary);
+}
+
+.historyItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.historyItem:hover {
+  background: var(--color-bg-secondary);
+}

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
@@ -15,8 +16,10 @@ import (
 
 	"github.com/esakat/markdown-kb/internal/config"
 	"github.com/esakat/markdown-kb/internal/index"
+	"github.com/esakat/markdown-kb/internal/parser"
 	"github.com/esakat/markdown-kb/internal/scanner"
 	"github.com/esakat/markdown-kb/internal/server"
+	"github.com/esakat/markdown-kb/internal/watcher"
 	"github.com/spf13/cobra"
 )
 
@@ -120,6 +123,17 @@ func newServeCmd() *cobra.Command {
 			defer store.Close()
 
 			srv := server.New(cfg, store)
+
+			// Start file watcher for live reload
+			w := watcher.New(cfg.RootDir)
+			if err := w.Start(func(relPath string) {
+				handleFileChange(cfg.RootDir, relPath, store, srv.Hub())
+			}); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: file watcher failed to start: %v\n", err)
+			} else {
+				defer w.Stop()
+				fmt.Println("File watcher started")
+			}
 
 			// Graceful shutdown
 			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -235,6 +249,52 @@ func outputJSON(docs []scanner.Document) error {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	return enc.Encode(entries)
+}
+
+// handleFileChange re-indexes a changed file and broadcasts the event.
+func handleFileChange(rootDir, relPath string, store *index.Store, hub *server.Hub) {
+	absPath := filepath.Join(rootDir, relPath)
+
+	info, err := os.Stat(absPath)
+	if os.IsNotExist(err) {
+		// File was deleted
+		if removeErr := store.RemoveDocument(relPath); removeErr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to remove %q from index: %v\n", relPath, removeErr)
+		}
+		hub.Broadcast(server.WSEvent{Type: "deleted", Path: relPath})
+		fmt.Printf("[watcher] deleted: %s\n", relPath)
+		return
+	}
+	if err != nil {
+		return
+	}
+
+	content, err := os.ReadFile(absPath)
+	if err != nil {
+		return
+	}
+
+	meta, body, parseErr := parser.ParseFrontmatter(strings.NewReader(string(content)))
+	doc := scanner.Document{
+		RelPath: relPath,
+		AbsPath: absPath,
+		ModTime: info.ModTime(),
+		Size:    info.Size(),
+	}
+	if parseErr != nil {
+		doc.Body = string(content)
+	} else {
+		doc.Frontmatter = meta
+		doc.Body = body
+	}
+
+	if err := store.IndexDocument(doc); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to index %q: %v\n", relPath, err)
+		return
+	}
+
+	hub.Broadcast(server.WSEvent{Type: "updated", Path: relPath})
+	fmt.Printf("[watcher] updated: %s\n", relPath)
 }
 
 func outputText(docs []scanner.Document) error {

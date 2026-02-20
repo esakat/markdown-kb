@@ -4,10 +4,21 @@ Git リポジトリ内の YAML frontmatter 付き Markdown ファイルを、ブ
 
 人間がブラウズしやすく、AI エージェント（Claude Code 等）が REST API でプログラマティックに検索・参照できる「人と AI 双方にフレンドリー」なナレッジベースビューア。
 
+## Install
+
+```bash
+# From GitHub Releases (recommended)
+# Download the binary for your OS/arch from:
+# https://github.com/esakat/markdown-kb/releases
+
+# Or install via go install
+go install github.com/esakat/markdown-kb/cmd/kb@latest
+```
+
 ## Quick Start
 
 ```bash
-# Build
+# Build from source
 make build
 
 # Serve current directory

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/esakat/markdown-kb/internal/config"
+	gitpkg "github.com/esakat/markdown-kb/internal/git"
 	"github.com/esakat/markdown-kb/internal/index"
 	"github.com/esakat/markdown-kb/web"
 )
@@ -22,6 +23,7 @@ var version = "dev"
 type Server struct {
 	cfg    config.ServeConfig
 	store  *index.Store
+	hub    *Hub
 	mux    *http.ServeMux
 	server *http.Server
 }
@@ -31,6 +33,7 @@ func New(cfg config.ServeConfig, store *index.Store) *Server {
 	s := &Server{
 		cfg:   cfg,
 		store: store,
+		hub:   NewHub(),
 		mux:   http.NewServeMux(),
 	}
 	s.registerRoutes()
@@ -41,14 +44,24 @@ func New(cfg config.ServeConfig, store *index.Store) *Server {
 	return s
 }
 
+// Hub returns the WebSocket hub for broadcasting events.
+func (s *Server) Hub() *Hub {
+	return s.hub
+}
+
 func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/documents", s.handleListDocuments)
 	s.mux.HandleFunc("GET /api/v1/documents/{path...}", s.handleGetDocument)
 	s.mux.HandleFunc("GET /api/v1/search", s.handleSearch)
 	s.mux.HandleFunc("GET /api/v1/tags", s.handleListTags)
 	s.mux.HandleFunc("GET /api/v1/metadata/fields", s.handleMetadataFields)
+	s.mux.HandleFunc("GET /api/v1/git/history/{path...}", s.handleHistory)
+	s.mux.HandleFunc("GET /api/v1/git/diff/{path...}", s.handleDiff)
+	s.mux.HandleFunc("GET /api/v1/git/blame/{path...}", s.handleBlame)
 	s.mux.HandleFunc("GET /api/v1/tree", s.handleTree)
+	s.mux.HandleFunc("GET /api/v1/graph", s.handleGraph)
 	s.mux.HandleFunc("GET /api/v1/raw/{path...}", s.handleRawFile)
+	s.mux.HandleFunc("GET /api/v1/ws", s.hub.ServeWS)
 	s.mux.HandleFunc("GET /api/health", s.handleHealth)
 
 	// SPA catch-all (lowest priority in ServeMux)
@@ -71,6 +84,9 @@ func (s *Server) Start() error {
 
 // Shutdown gracefully stops the server with a timeout.
 func (s *Server) Shutdown(ctx context.Context) error {
+	if s.hub != nil {
+		s.hub.Close()
+	}
 	if s.server == nil {
 		return nil
 	}
@@ -134,7 +150,25 @@ func (s *Server) handleListDocuments(w http.ResponseWriter, r *http.Request) {
 
 	offset := (page - 1) * limit
 
-	docs, total, err := s.store.ListDocuments(limit, offset)
+	// Build filters from query params
+	filters := make(map[string]string)
+	if status := r.URL.Query().Get("status"); status != "" {
+		filters["status"] = status
+	}
+	if tag := r.URL.Query().Get("tag"); tag != "" {
+		filters["tags"] = tag
+	}
+
+	var docs []index.DocumentSummary
+	var total int
+	var err error
+
+	if len(filters) > 0 {
+		docs, total, err = s.store.ListDocumentsWithFilter(filters, limit, offset)
+	} else {
+		docs, total, err = s.store.ListDocuments(limit, offset)
+	}
+
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to list documents")
 		return
@@ -169,7 +203,30 @@ func (s *Server) handleGetDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"data": doc})
+	result := map[string]any{"data": doc}
+
+	// Enrich with Git dates if available and frontmatter lacks dates
+	if s.cfg.RootDir != "" {
+		_, hasCreated := doc.Meta["created"]
+		_, hasUpdated := doc.Meta["updated"]
+		if !hasCreated || !hasUpdated {
+			created, updated, gitErr := gitpkg.FileDates(s.cfg.RootDir, path)
+			if gitErr == nil {
+				gitDates := map[string]any{}
+				if !hasCreated && !created.IsZero() {
+					gitDates["created"] = created.Format(time.RFC3339)
+				}
+				if !hasUpdated && !updated.IsZero() {
+					gitDates["updated"] = updated.Format(time.RFC3339)
+				}
+				if len(gitDates) > 0 {
+					result["git_dates"] = gitDates
+				}
+			}
+		}
+	}
+
+	writeJSON(w, http.StatusOK, result)
 }
 
 func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
@@ -261,6 +318,112 @@ func (s *Server) handleTree(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"data": tree})
 }
 
+func (s *Server) handleHistory(w http.ResponseWriter, r *http.Request) {
+	docPath := r.PathValue("path")
+	if docPath == "" {
+		writeError(w, http.StatusBadRequest, "path is required")
+		return
+	}
+
+	// Verify document exists in index
+	doc, err := s.store.GetDocument(docPath)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to get document")
+		return
+	}
+	if doc == nil {
+		writeError(w, http.StatusNotFound, "document not found")
+		return
+	}
+
+	if s.cfg.RootDir == "" {
+		writeError(w, http.StatusInternalServerError, "git integration requires root directory")
+		return
+	}
+
+	commits, err := gitpkg.FileHistory(s.cfg.RootDir, docPath)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to get file history")
+		return
+	}
+
+	if commits == nil {
+		commits = []gitpkg.Commit{}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"data": commits})
+}
+
+func (s *Server) handleDiff(w http.ResponseWriter, r *http.Request) {
+	docPath := r.PathValue("path")
+	if docPath == "" {
+		writeError(w, http.StatusBadRequest, "path is required")
+		return
+	}
+
+	from := r.URL.Query().Get("from")
+	to := r.URL.Query().Get("to")
+	if from == "" || to == "" {
+		writeError(w, http.StatusBadRequest, "'from' and 'to' query parameters are required")
+		return
+	}
+
+	if s.cfg.RootDir == "" {
+		writeError(w, http.StatusInternalServerError, "git integration requires root directory")
+		return
+	}
+
+	diff, err := gitpkg.Diff(s.cfg.RootDir, docPath, from, to)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to get diff")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"data": diff})
+}
+
+func (s *Server) handleBlame(w http.ResponseWriter, r *http.Request) {
+	docPath := r.PathValue("path")
+	if docPath == "" {
+		writeError(w, http.StatusBadRequest, "path is required")
+		return
+	}
+
+	if s.cfg.RootDir == "" {
+		writeError(w, http.StatusInternalServerError, "git integration requires root directory")
+		return
+	}
+
+	startStr := r.URL.Query().Get("start")
+	endStr := r.URL.Query().Get("end")
+
+	var lines []gitpkg.BlameLine
+	var err error
+
+	if startStr != "" && endStr != "" {
+		start, _ := strconv.Atoi(startStr)
+		end, _ := strconv.Atoi(endStr)
+		if start < 1 || end < start {
+			writeError(w, http.StatusBadRequest, "invalid line range")
+			return
+		}
+		lines, err = gitpkg.BlameRange(s.cfg.RootDir, docPath, start, end)
+	} else {
+		lines, err = gitpkg.Blame(s.cfg.RootDir, docPath)
+	}
+
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to get blame")
+		return
+	}
+
+	if lines == nil {
+		lines = []gitpkg.BlameLine{}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"data": lines})
+}
+
 func (s *Server) handleRawFile(w http.ResponseWriter, r *http.Request) {
 	filePath := r.PathValue("path")
 	if filePath == "" {
@@ -289,4 +452,14 @@ func (s *Server) handleRawFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.ServeFile(w, r, fullPath)
+}
+
+func (s *Server) handleGraph(w http.ResponseWriter, r *http.Request) {
+	graph, err := s.store.BuildGraph()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to build graph")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"data": graph})
 }

@@ -5,6 +5,7 @@ import styles from "./FrontmatterPanel.module.css";
 
 interface Props {
   doc: DocumentDetail;
+  gitDates?: { created?: string; updated?: string };
 }
 
 function formatDate(dateStr: string): string {
@@ -22,9 +23,13 @@ function formatSize(bytes: number): string {
   return `${(bytes / 1024).toFixed(1)} KB`;
 }
 
-export function FrontmatterPanel({ doc }: Props) {
+export function FrontmatterPanel({ doc, gitDates }: Props) {
   const status = doc.meta?.status as string | undefined;
   const tags = (doc.meta?.tags as string[]) ?? [];
+  const created =
+    (doc.meta?.created as string) || gitDates?.created;
+  const updated =
+    (doc.meta?.updated as string) || gitDates?.updated;
 
   return (
     <div class={styles.panel} data-testid="frontmatter-panel">
@@ -35,6 +40,16 @@ export function FrontmatterPanel({ doc }: Props) {
         ))}
       </div>
       <div class={styles.meta}>
+        {created && (
+          <span class={styles.metaItem} title="Created">
+            Created: {formatDate(created)}
+          </span>
+        )}
+        {updated && (
+          <span class={styles.metaItem} title="Updated">
+            Updated: {formatDate(updated)}
+          </span>
+        )}
         <span class={styles.metaItem}>
           {formatDate(doc.mod_time)}
         </span>

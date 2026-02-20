@@ -36,4 +36,4 @@ web/node_modules/
 web/dist/
 
 # Binary
-kb
+/kb

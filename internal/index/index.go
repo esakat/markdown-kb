@@ -232,6 +232,59 @@ func (s *Store) SearchWithFilter(query string, filters map[string]string, limit,
 	return results, total, rows.Err()
 }
 
+// ListDocumentsWithFilter returns a paginated list of documents filtered by metadata.
+// When filters is nil or empty, it returns all documents (same as ListDocuments).
+func (s *Store) ListDocumentsWithFilter(filters map[string]string, limit, offset int) ([]DocumentSummary, int, error) {
+	var filterClauses []string
+	var filterArgs []any
+
+	for key, val := range filters {
+		filterClauses = append(filterClauses, "json_extract(meta, ?) LIKE ?")
+		filterArgs = append(filterArgs, "$."+key, "%"+val+"%")
+	}
+
+	whereSQL := ""
+	if len(filterClauses) > 0 {
+		whereSQL = " WHERE " + strings.Join(filterClauses, " AND ")
+	}
+
+	// Count total matching documents
+	var total int
+	countQuery := "SELECT COUNT(*) FROM documents" + whereSQL
+	if err := s.db.QueryRow(countQuery, filterArgs...).Scan(&total); err != nil {
+		return nil, 0, fmt.Errorf("counting filtered documents: %w", err)
+	}
+
+	// Fetch paginated results
+	query := fmt.Sprintf(`
+		SELECT path, title, meta, mod_time, size
+		FROM documents%s
+		ORDER BY path
+		LIMIT ? OFFSET ?
+	`, whereSQL)
+
+	args := append(filterArgs, limit, offset)
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, 0, fmt.Errorf("listing filtered documents: %w", err)
+	}
+	defer rows.Close()
+
+	var docs []DocumentSummary
+	for rows.Next() {
+		var d DocumentSummary
+		var metaJSON, modTimeStr string
+		if err := rows.Scan(&d.Path, &d.Title, &metaJSON, &modTimeStr, &d.Size); err != nil {
+			return nil, 0, fmt.Errorf("scanning document: %w", err)
+		}
+		json.Unmarshal([]byte(metaJSON), &d.Meta)
+		d.ModTime, _ = time.Parse(time.RFC3339, modTimeStr)
+		docs = append(docs, d)
+	}
+
+	return docs, total, rows.Err()
+}
+
 // ListDocuments returns a paginated list of documents.
 func (s *Store) ListDocuments(limit, offset int) ([]DocumentSummary, int, error) {
 	var total int
