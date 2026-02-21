@@ -28,7 +28,7 @@ jobs:
           node-version: 20
 
       - name: Run Go tests
-        run: go test ./... -v -race
+        run: go test -tags dev ./... -v -race
 
       - name: Run frontend tests
         run: cd web && npm ci && npx vitest run
