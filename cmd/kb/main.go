@@ -116,6 +116,23 @@ func newServeCmd() *cobra.Command {
 				return err
 			}
 
+			// Load per-repo config (.markdown-kb.yml)
+			repoCfg, err := config.LoadRepoConfig(cfg.RootDir)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: failed to load .markdown-kb.yml: %v\n", err)
+			}
+			// CLI --title flag overrides config file
+			if titleFlag, _ := cmd.Flags().GetString("title"); titleFlag != "" {
+				repoCfg.Title = titleFlag
+			}
+			if themeFlag, _ := cmd.Flags().GetString("theme"); themeFlag != "" {
+				repoCfg.Theme = themeFlag
+			}
+			if fontFlag, _ := cmd.Flags().GetString("font"); fontFlag != "" {
+				repoCfg.Font = fontFlag
+			}
+			cfg.Repo = repoCfg
+
 			store, docs, err := scanAndIndex(cfg.RootDir)
 			if err != nil {
 				return err
@@ -166,6 +183,9 @@ func newServeCmd() *cobra.Command {
 
 	cmd.Flags().IntVar(&cfg.Port, "port", 3000, "Port to listen on")
 	cmd.Flags().BoolVar(&cfg.Open, "open", false, "Open browser after starting")
+	cmd.Flags().String("title", "", "Override display title (default: directory name or .markdown-kb.yml)")
+	cmd.Flags().String("theme", "", "Color theme: default, tokyo-night, dracula, nord, solarized, monokai, github, catppuccin, gruvbox, rose-pine")
+	cmd.Flags().String("font", "", "Font preset: default, noto-sans, rounded, serif, zen-kaku")
 
 	return cmd
 }

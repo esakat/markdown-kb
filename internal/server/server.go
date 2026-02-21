@@ -61,6 +61,7 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/v1/tree", s.handleTree)
 	s.mux.HandleFunc("GET /api/v1/graph", s.handleGraph)
 	s.mux.HandleFunc("GET /api/v1/raw/{path...}", s.handleRawFile)
+	s.mux.HandleFunc("GET /api/v1/config", s.handleConfig)
 	s.mux.HandleFunc("GET /api/v1/ws", s.hub.ServeWS)
 	s.mux.HandleFunc("GET /api/health", s.handleHealth)
 
@@ -129,6 +130,21 @@ func queryInt(r *http.Request, key string, defaultVal int) int {
 		return defaultVal
 	}
 	return v
+}
+
+func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
+	resp := map[string]any{
+		"title":  s.cfg.Repo.Title,
+		"theme":  s.cfg.Repo.Theme,
+		"themes": config.ValidThemes,
+		"font":   s.cfg.Repo.Font,
+		"fonts":  config.ValidFonts,
+	}
+	if preset := config.GetFontPreset(s.cfg.Repo.Font); preset != nil {
+		resp["font_url"] = preset.URL
+		resp["font_family"] = preset.Family
+	}
+	writeJSON(w, http.StatusOK, resp)
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {

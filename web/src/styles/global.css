@@ -10,6 +10,7 @@
   --color-success: #198754;
   --color-warning: #ffc107;
   --color-info: #0dcaf0;
+  --color-accent: #0d6efd;
 
   --sidebar-width: 260px;
   --header-height: 48px;
@@ -36,10 +37,264 @@
   --color-success: #9ece6a;
   --color-warning: #e0af68;
   --color-info: #7dcfff;
+  --color-accent: #7aa2f7;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
 
   color-scheme: dark;
+}
+
+/* ===========================
+   Named Theme Presets
+   =========================== */
+
+/* --- Tokyo Night --- */
+[data-accent="tokyo-night"] {
+  --color-primary: #34548a;
+  --color-primary-light: #d5dff0;
+  --color-accent: #7aa2f7;
+}
+[data-accent="tokyo-night"][data-theme="dark"] {
+  --color-bg: #1a1b26;
+  --color-bg-secondary: #24283b;
+  --color-surface: #2f3349;
+  --color-text: #c0caf5;
+  --color-text-secondary: #7982a9;
+  --color-border: #3b4261;
+  --color-primary: #7aa2f7;
+  --color-primary-light: #283457;
+  --color-success: #9ece6a;
+  --color-warning: #e0af68;
+  --color-info: #7dcfff;
+  --color-accent: #7aa2f7;
+}
+
+/* --- Dracula --- */
+[data-accent="dracula"] {
+  --color-primary: #7c3aed;
+  --color-primary-light: #ede9fe;
+  --color-accent: #bd93f9;
+  --color-success: #50fa7b;
+  --color-warning: #f1fa8c;
+  --color-info: #8be9fd;
+}
+[data-accent="dracula"][data-theme="dark"] {
+  --color-bg: #282a36;
+  --color-bg-secondary: #21222c;
+  --color-surface: #343746;
+  --color-text: #f8f8f2;
+  --color-text-secondary: #6272a4;
+  --color-border: #44475a;
+  --color-primary: #bd93f9;
+  --color-primary-light: #3b3055;
+  --color-success: #50fa7b;
+  --color-warning: #f1fa8c;
+  --color-info: #8be9fd;
+  --color-accent: #bd93f9;
+}
+
+/* --- Nord --- */
+[data-accent="nord"] {
+  --color-bg: #eceff4;
+  --color-bg-secondary: #e5e9f0;
+  --color-surface: #d8dee9;
+  --color-text: #2e3440;
+  --color-text-secondary: #4c566a;
+  --color-border: #c8ced8;
+  --color-primary: #5e81ac;
+  --color-primary-light: #d8e2ef;
+  --color-accent: #88c0d0;
+  --color-success: #a3be8c;
+  --color-warning: #ebcb8b;
+  --color-info: #88c0d0;
+}
+[data-accent="nord"][data-theme="dark"] {
+  --color-bg: #2e3440;
+  --color-bg-secondary: #3b4252;
+  --color-surface: #434c5e;
+  --color-text: #eceff4;
+  --color-text-secondary: #81a1c1;
+  --color-border: #4c566a;
+  --color-primary: #88c0d0;
+  --color-primary-light: #2e3e4a;
+  --color-success: #a3be8c;
+  --color-warning: #ebcb8b;
+  --color-info: #81a1c1;
+  --color-accent: #88c0d0;
+}
+
+/* --- Solarized --- */
+[data-accent="solarized"] {
+  --color-bg: #fdf6e3;
+  --color-bg-secondary: #eee8d5;
+  --color-surface: #e8e1cc;
+  --color-text: #657b83;
+  --color-text-secondary: #93a1a1;
+  --color-border: #d3cbb7;
+  --color-primary: #268bd2;
+  --color-primary-light: #d5eaf7;
+  --color-accent: #b58900;
+  --color-success: #859900;
+  --color-warning: #b58900;
+  --color-info: #2aa198;
+}
+[data-accent="solarized"][data-theme="dark"] {
+  --color-bg: #002b36;
+  --color-bg-secondary: #073642;
+  --color-surface: #0a3f4c;
+  --color-text: #839496;
+  --color-text-secondary: #586e75;
+  --color-border: #164a57;
+  --color-primary: #268bd2;
+  --color-primary-light: #0a3a54;
+  --color-success: #859900;
+  --color-warning: #b58900;
+  --color-info: #2aa198;
+  --color-accent: #b58900;
+}
+
+/* --- Monokai --- */
+[data-accent="monokai"] {
+  --color-primary: #5a8f29;
+  --color-primary-light: #e4f0d9;
+  --color-accent: #a6e22e;
+  --color-success: #a6e22e;
+  --color-warning: #e6db74;
+  --color-info: #66d9ef;
+}
+[data-accent="monokai"][data-theme="dark"] {
+  --color-bg: #272822;
+  --color-bg-secondary: #1e1f1c;
+  --color-surface: #3e3d32;
+  --color-text: #f8f8f2;
+  --color-text-secondary: #75715e;
+  --color-border: #49483e;
+  --color-primary: #a6e22e;
+  --color-primary-light: #2f3a1a;
+  --color-success: #a6e22e;
+  --color-warning: #e6db74;
+  --color-info: #66d9ef;
+  --color-accent: #a6e22e;
+}
+
+/* --- GitHub --- */
+[data-accent="github"] {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f6f8fa;
+  --color-surface: #eaeef2;
+  --color-text: #1f2328;
+  --color-text-secondary: #656d76;
+  --color-border: #d0d7de;
+  --color-primary: #0969da;
+  --color-primary-light: #ddf4ff;
+  --color-accent: #0969da;
+  --color-success: #1a7f37;
+  --color-warning: #9a6700;
+  --color-info: #0550ae;
+}
+[data-accent="github"][data-theme="dark"] {
+  --color-bg: #0d1117;
+  --color-bg-secondary: #161b22;
+  --color-surface: #21262d;
+  --color-text: #e6edf3;
+  --color-text-secondary: #7d8590;
+  --color-border: #30363d;
+  --color-primary: #58a6ff;
+  --color-primary-light: #1a2f4a;
+  --color-success: #3fb950;
+  --color-warning: #d29922;
+  --color-info: #58a6ff;
+  --color-accent: #58a6ff;
+}
+
+/* --- Catppuccin --- */
+[data-accent="catppuccin"] {
+  --color-bg: #eff1f5;
+  --color-bg-secondary: #e6e9ef;
+  --color-surface: #ccd0da;
+  --color-text: #4c4f69;
+  --color-text-secondary: #6c6f85;
+  --color-border: #bcc0cc;
+  --color-primary: #8839ef;
+  --color-primary-light: #e8ddf9;
+  --color-accent: #cba6f7;
+  --color-success: #40a02b;
+  --color-warning: #df8e1d;
+  --color-info: #04a5e5;
+}
+[data-accent="catppuccin"][data-theme="dark"] {
+  --color-bg: #1e1e2e;
+  --color-bg-secondary: #181825;
+  --color-surface: #313244;
+  --color-text: #cdd6f4;
+  --color-text-secondary: #a6adc8;
+  --color-border: #45475a;
+  --color-primary: #cba6f7;
+  --color-primary-light: #3b2e58;
+  --color-success: #a6e3a1;
+  --color-warning: #f9e2af;
+  --color-info: #89dceb;
+  --color-accent: #cba6f7;
+}
+
+/* --- Gruvbox --- */
+[data-accent="gruvbox"] {
+  --color-bg: #fbf1c7;
+  --color-bg-secondary: #f2e5bc;
+  --color-surface: #ebdbb2;
+  --color-text: #3c3836;
+  --color-text-secondary: #665c54;
+  --color-border: #d5c4a1;
+  --color-primary: #d65d0e;
+  --color-primary-light: #f5dcc8;
+  --color-accent: #fe8019;
+  --color-success: #98971a;
+  --color-warning: #d79921;
+  --color-info: #458588;
+}
+[data-accent="gruvbox"][data-theme="dark"] {
+  --color-bg: #282828;
+  --color-bg-secondary: #1d2021;
+  --color-surface: #3c3836;
+  --color-text: #ebdbb2;
+  --color-text-secondary: #a89984;
+  --color-border: #504945;
+  --color-primary: #fe8019;
+  --color-primary-light: #4a2e10;
+  --color-success: #b8bb26;
+  --color-warning: #fabd2f;
+  --color-info: #83a598;
+  --color-accent: #fe8019;
+}
+
+/* --- Rose Pine --- */
+[data-accent="rose-pine"] {
+  --color-bg: #faf4ed;
+  --color-bg-secondary: #f2e9e1;
+  --color-surface: #e4ddd6;
+  --color-text: #575279;
+  --color-text-secondary: #797593;
+  --color-border: #dfdad9;
+  --color-primary: #907aa9;
+  --color-primary-light: #e8e0f0;
+  --color-accent: #c4a7e7;
+  --color-success: #56949f;
+  --color-warning: #ea9d34;
+  --color-info: #286983;
+}
+[data-accent="rose-pine"][data-theme="dark"] {
+  --color-bg: #191724;
+  --color-bg-secondary: #1f1d2e;
+  --color-surface: #26233a;
+  --color-text: #e0def4;
+  --color-text-secondary: #908caa;
+  --color-border: #393552;
+  --color-primary: #c4a7e7;
+  --color-primary-light: #302548;
+  --color-success: #9ccfd8;
+  --color-warning: #f6c177;
+  --color-info: #31748f;
+  --color-accent: #c4a7e7;
 }
 
 *,

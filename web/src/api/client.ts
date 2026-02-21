@@ -1,5 +1,6 @@
 import type {
   ApiResponse,
+  AppConfig,
   DocumentDetail,
   PaginatedResponse,
   DocumentSummary,
@@ -109,4 +110,8 @@ export function getFileBlame(
 
 export function getGraph(): Promise<ApiResponse<GraphData>> {
   return fetchJSON(`${BASE}/graph`);
+}
+
+export function getConfig(): Promise<AppConfig> {
+  return fetchJSON(`${BASE}/config`);
 }

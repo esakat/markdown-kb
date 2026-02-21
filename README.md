@@ -38,6 +38,7 @@ kb index --format text
 - **REST API** - 全機能を API で提供、AI エージェントからのプログラマティックアクセス対応
 - **Read-only** - ソースファイルを一切変更しない安全設計
 - **Single Binary** - Preact SPA を `go:embed` で同梱、デプロイは 1 ファイル
+- **Per-Repo Theming** - リポジトリごとにテーマカラー、タイトル、フォントをカスタマイズ（VS Code 系テーマ対応）
 
 ## API
 
@@ -111,6 +112,69 @@ curl localhost:3000/api/health
 
 # WebSocket（ライブリロード用）
 wscat -c ws://localhost:3000/api/v1/ws
+```
+
+## Customization
+
+複数リポジトリで markdown-kb を同時に使うとき、テーマカラー・タイトル・フォントでインスタンスを区別できます。
+
+### Per-Repo Config
+
+リポジトリルートに `.markdown-kb.yml`（または `.markdown-kb.yaml`）を配置：
+
+```yaml
+title: "DevShot Docs"
+theme: dracula
+font: noto-sans
+```
+
+| フィールド | 説明 | デフォルト |
+|-----------|------|----------|
+| `title` | ヘッダー・ブラウザタブに表示される名前 | ディレクトリ名 |
+| `theme` | カラーテーマ名 | `default` |
+| `font` | フォントプリセット名 | `default` |
+
+### CLI フラグで上書き
+
+```bash
+kb serve --title "My Project" --theme nord --font serif
+kb serve /path/to/docs --theme gruvbox --open
+```
+
+### 対応テーマ
+
+| テーマ | 説明 |
+|-------|------|
+| `default` | デフォルト (Blue) |
+| `tokyo-night` | Tokyo Night |
+| `dracula` | Dracula (Purple) |
+| `nord` | Nord (Frost Blue) |
+| `solarized` | Solarized (Warm Amber) |
+| `monokai` | Monokai (Green) |
+| `github` | GitHub |
+| `catppuccin` | Catppuccin (Lavender) |
+| `gruvbox` | Gruvbox (Orange) |
+| `rose-pine` | Rosé Pine (Pink) |
+
+各テーマは Light / Dark 両モードに対応しています。ヘッダー上部にアクセントカラーのバーが表示され、一目でどのリポジトリか判別できます。
+
+### 対応フォント
+
+| フォント | 説明 |
+|---------|------|
+| `default` | BIZ UDPGothic（デフォルト） |
+| `noto-sans` | Noto Sans JP（クリーンなゴシック） |
+| `rounded` | M PLUS Rounded 1c（丸ゴシック） |
+| `serif` | Noto Serif JP（明朝体） |
+| `zen-kaku` | Zen Kaku Gothic New（モダンゴシック） |
+
+フォントは Google Fonts から動的に読み込まれます。日本語・英語両対応。
+
+### Config API
+
+```bash
+# 現在のテーマ設定を取得
+curl localhost:3000/api/v1/config
 ```
 
 ## Tech Stack

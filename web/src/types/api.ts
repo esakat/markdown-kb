@@ -81,3 +81,12 @@ export interface GraphData {
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
+
+export interface AppConfig {
+  title: string;
+  theme: string;
+  themes: string[];
+  font: string;
+  font_url: string;
+  font_family: string;
+}

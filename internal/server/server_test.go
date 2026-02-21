@@ -834,6 +834,69 @@ func TestQueryInt_InvalidValue(t *testing.T) {
 	}
 }
 
+func TestHandleConfig(t *testing.T) {
+	_, ts := newTestServer(t)
+
+	resp, err := http.Get(ts.URL + "/api/v1/config")
+	if err != nil {
+		t.Fatalf("GET /api/v1/config error = %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+
+	var body map[string]any
+	json.NewDecoder(resp.Body).Decode(&body)
+
+	if body["theme"] == nil {
+		t.Error("expected 'theme' field in config response")
+	}
+	if body["title"] == nil {
+		t.Error("expected 'title' field in config response")
+	}
+	themes, ok := body["themes"].([]any)
+	if !ok || len(themes) == 0 {
+		t.Error("expected non-empty 'themes' list in config response")
+	}
+}
+
+func TestHandleConfig_WithRepoConfig(t *testing.T) {
+	store, err := index.New()
+	if err != nil {
+		t.Fatalf("index.New() error = %v", err)
+	}
+	t.Cleanup(func() { store.Close() })
+
+	cfg := config.ServeConfig{
+		Port: 0,
+		Repo: config.RepoConfig{
+			Title: "My Project",
+			Theme: "dracula",
+		},
+	}
+	srv := New(cfg, store)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	resp, err := http.Get(ts.URL + "/api/v1/config")
+	if err != nil {
+		t.Fatalf("GET error = %v", err)
+	}
+	defer resp.Body.Close()
+
+	var body map[string]any
+	json.NewDecoder(resp.Body).Decode(&body)
+
+	if body["title"] != "My Project" {
+		t.Errorf("title = %v, want %q", body["title"], "My Project")
+	}
+	if body["theme"] != "dracula" {
+		t.Errorf("theme = %v, want %q", body["theme"], "dracula")
+	}
+}
+
 func TestHandleGraph(t *testing.T) {
 	_, ts := newTestServer(t)
 

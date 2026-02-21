@@ -4,6 +4,7 @@ import { Sidebar } from "./Sidebar/Sidebar";
 import { SearchBar } from "./Search/SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "../hooks/useTheme";
+import { useAppConfig } from "../hooks/useAppConfig";
 import styles from "./Layout.module.css";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 export function Layout({ currentPath, onSearch, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const appConfig = useAppConfig();
 
   return (
     <div class={styles.layout}>
@@ -29,7 +31,7 @@ export function Layout({ currentPath, onSearch, children }: Props) {
         </button>
         <h1 class={styles.title}>
           <a href="/" style={{ color: "inherit", textDecoration: "none" }}>
-            Markdown KB
+            {appConfig.title}
           </a>
         </h1>
         <nav class={styles.nav}>

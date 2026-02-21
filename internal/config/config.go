@@ -5,6 +5,7 @@ type ServeConfig struct {
 	RootDir string
 	Port    int
 	Open    bool
+	Repo    RepoConfig
 }
 
 // IndexConfig holds configuration for the index command.
