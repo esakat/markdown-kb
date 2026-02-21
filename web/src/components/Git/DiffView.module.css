@@ -88,6 +88,27 @@
   font-style: italic;
 }
 
+/* --- Dark mode diff colors --- */
+:global([data-theme="dark"]) .lineAdd {
+  background: #0d3321;
+}
+
+:global([data-theme="dark"]) .lineAdd .lineNo {
+  background: #0a2b1b;
+}
+
+:global([data-theme="dark"]) .lineDel {
+  background: #3c1418;
+}
+
+:global([data-theme="dark"]) .lineDel .lineNo {
+  background: #331016;
+}
+
+:global([data-theme="dark"]) .lineHunk {
+  background: var(--color-surface);
+}
+
 .loading {
   padding: 16px;
   text-align: center;

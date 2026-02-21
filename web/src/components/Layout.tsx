@@ -2,6 +2,8 @@ import { useState } from "preact/hooks";
 import type { ComponentChildren } from "preact";
 import { Sidebar } from "./Sidebar/Sidebar";
 import { SearchBar } from "./Search/SearchBar";
+import { ThemeToggle } from "./ThemeToggle";
+import { useTheme } from "../hooks/useTheme";
 import styles from "./Layout.module.css";
 
 interface Props {
@@ -12,6 +14,7 @@ interface Props {
 
 export function Layout({ currentPath, onSearch, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div class={styles.layout}>
@@ -35,6 +38,7 @@ export function Layout({ currentPath, onSearch, children }: Props) {
           </a>
         </nav>
         {onSearch && <SearchBar onSearch={onSearch} />}
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
       </header>
       <div class={styles.body}>
         <div

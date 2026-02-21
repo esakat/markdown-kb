@@ -26,3 +26,24 @@
   background: #dbeafe;
   color: #1e40af;
 }
+
+/* --- Dark mode --- */
+:global([data-theme="dark"]) .published {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+:global([data-theme="dark"]) .draft {
+  background: #451a03;
+  color: #fcd34d;
+}
+
+:global([data-theme="dark"]) .archived {
+  background: #374151;
+  color: #9ca3af;
+}
+
+:global([data-theme="dark"]) .default {
+  background: #1e3a5f;
+  color: #93c5fd;
+}

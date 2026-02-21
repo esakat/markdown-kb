@@ -18,7 +18,7 @@
 }
 
 .node circle {
-  stroke: #fff;
+  stroke: var(--color-bg);
   stroke-width: 2;
 }
 

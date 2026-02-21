@@ -1,0 +1,26 @@
+.tocRow {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.tocLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.tocRight {
+  flex: 0 0 340px;
+}
+
+@media (max-width: 768px) {
+  .tocRow {
+    flex-direction: column;
+  }
+
+  .tocRight {
+    flex: none;
+    width: 100%;
+  }
+}

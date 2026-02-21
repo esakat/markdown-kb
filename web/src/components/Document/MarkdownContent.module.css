@@ -103,3 +103,144 @@
   border-top: 1px solid var(--color-border);
   margin: 2em 0;
 }
+
+/* --- Diff highlighting (light) --- */
+.prose pre code :global(.hljs-addition) {
+  background: #e6ffec;
+  color: #1a7f37;
+  display: inline;
+}
+
+.prose pre code :global(.hljs-deletion) {
+  background: #ffebe9;
+  color: #cf222e;
+  display: inline;
+}
+
+/* --- Diff highlighting (dark) --- */
+:global([data-theme="dark"]) .prose pre code :global(.hljs-addition) {
+  background: #033a16;
+  color: #aff5b4;
+}
+
+:global([data-theme="dark"]) .prose pre code :global(.hljs-deletion) {
+  background: #67060c;
+  color: #ffdcd7;
+}
+
+/* --- Wiki-link --- */
+.prose :global(.wiki-link) {
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--color-primary);
+}
+
+.prose :global(.wiki-link):hover {
+  border-bottom-style: solid;
+}
+
+/* --- Mermaid --- */
+.prose :global(pre.mermaid) {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* --- Container directives: :::message, :::warning, :::info, :::tip, :::danger --- */
+.prose :global(.container-message),
+.prose :global(.container-info) {
+  background: #eef6ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 1em 0;
+  color: #1e40af;
+}
+
+.prose :global(.container-warning) {
+  background: #fff8e6;
+  border-left: 4px solid #f59e0b;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 1em 0;
+  color: #92400e;
+}
+
+.prose :global(.container-tip) {
+  background: #ecfdf5;
+  border-left: 4px solid #10b981;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 1em 0;
+  color: #065f46;
+}
+
+.prose :global(.container-danger) {
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 12px 16px;
+  margin: 1em 0;
+  color: #991b1b;
+}
+
+/* --- Details/accordion --- */
+.prose :global(.container-details) {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin: 1em 0;
+}
+
+.prose :global(.container-details) summary {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+}
+
+.prose :global(.container-details[open]) summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.prose :global(.container-details) > :not(summary) {
+  padding: 0 16px;
+}
+
+/* Remove margins on first/last children inside containers */
+.prose :global([class^="container-"]) > :first-child {
+  margin-top: 0;
+}
+
+.prose :global([class^="container-"]) > :last-child {
+  margin-bottom: 0;
+}
+
+/* --- Dark mode: container directives --- */
+:global([data-theme="dark"]) .prose :global(.container-message),
+:global([data-theme="dark"]) .prose :global(.container-info) {
+  background: #1a2744;
+  border-left-color: #5b8def;
+  color: #93b4f5;
+}
+
+:global([data-theme="dark"]) .prose :global(.container-warning) {
+  background: #2d2411;
+  border-left-color: #d4940a;
+  color: #e8c96a;
+}
+
+:global([data-theme="dark"]) .prose :global(.container-tip) {
+  background: #112a1e;
+  border-left-color: #2dd4a0;
+  color: #7ee8c7;
+}
+
+:global([data-theme="dark"]) .prose :global(.container-danger) {
+  background: #2a1215;
+  border-left-color: #ef5555;
+  color: #f5a0a0;
+}

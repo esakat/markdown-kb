@@ -79,6 +79,12 @@ func openDB(dsn string) (*Store, error) {
 		return nil, fmt.Errorf("opening database: %w", err)
 	}
 
+	// For in-memory databases, restrict to a single connection so all
+	// operations share the same database instance. Without this,
+	// database/sql may open multiple connections to :memory:, each
+	// with its own empty database.
+	db.SetMaxOpenConns(1)
+
 	if _, err := db.Exec(schema); err != nil {
 		db.Close()
 		return nil, fmt.Errorf("initializing schema: %w", err)

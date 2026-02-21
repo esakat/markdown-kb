@@ -1,11 +1,14 @@
-import { useState, useEffect } from "preact/hooks";
-import { getDocument } from "../api/client";
-import type { DocumentDetail } from "../types/api";
+import { useState, useEffect, useCallback } from "preact/hooks";
+import { route } from "preact-router";
+import { getDocument, getGraph } from "../api/client";
+import type { DocumentDetail, GraphData } from "../types/api";
 import { FrontmatterPanel } from "../components/Document/FrontmatterPanel";
 import { MarkdownContent } from "../components/Document/MarkdownContent";
 import { TableOfContents } from "../components/Document/TableOfContents";
 import { CommitHistory } from "../components/Git/CommitHistory";
 import { DiffView } from "../components/Git/DiffView";
+import { MiniGraph } from "../components/Graph/MiniGraph";
+import styles from "./DocumentPage.module.css";
 
 interface Props {
   path?: string;
@@ -22,6 +25,7 @@ export function DocumentPage({ docPath }: Props) {
   const [gitDates, setGitDates] = useState<
     { created?: string; updated?: string } | undefined
   >(undefined);
+  const [graph, setGraph] = useState<GraphData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [diffRange, setDiffRange] = useState<{
@@ -36,21 +40,19 @@ export function DocumentPage({ docPath }: Props) {
     setError(null);
     setDiffRange(null);
 
-    // Fetch the raw response to capture git_dates alongside data
-    getDocument(docPath)
-      .then((res) => {
-        if (!cancelled) {
-          const raw = res as unknown as DocResponse;
-          setDoc(raw.data);
-          setGitDates(raw.git_dates);
-          setLoading(false);
-        }
+    Promise.all([getDocument(docPath), getGraph()])
+      .then(([docRes, graphRes]) => {
+        if (cancelled) return;
+        const raw = docRes as unknown as DocResponse;
+        setDoc(raw.data);
+        setGitDates(raw.git_dates);
+        setGraph(graphRes.data);
+        setLoading(false);
       })
       .catch((err) => {
-        if (!cancelled) {
-          setError(err.message);
-          setLoading(false);
-        }
+        if (cancelled) return;
+        setError(err.message);
+        setLoading(false);
       });
 
     return () => {
@@ -58,15 +60,41 @@ export function DocumentPage({ docPath }: Props) {
     };
   }, [docPath]);
 
+  const handleNodeClick = useCallback((path: string) => {
+    route(`/docs/${path}`);
+  }, []);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: "#dc3545" }}>Error: {error}</p>;
   if (!doc) return <p>Document not found.</p>;
+
+  const hasConnections =
+    graph &&
+    graph.edges.some(
+      (e) => e.source === docPath || e.target === docPath,
+    );
 
   return (
     <article>
       <h1>{doc.title || docPath}</h1>
       <FrontmatterPanel doc={doc} gitDates={gitDates} />
-      <TableOfContents markdown={doc.body} />
+
+      <div class={styles.tocRow}>
+        <div class={styles.tocLeft}>
+          <TableOfContents markdown={doc.body} />
+        </div>
+        {hasConnections && graph && docPath && (
+          <div class={styles.tocRight}>
+            <MiniGraph
+              centerPath={docPath}
+              nodes={graph.nodes}
+              edges={graph.edges}
+              onNodeClick={handleNodeClick}
+            />
+          </div>
+        )}
+      </div>
+
       <MarkdownContent source={doc.body} docPath={docPath} />
 
       {docPath && (

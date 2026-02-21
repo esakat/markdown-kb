@@ -50,6 +50,10 @@
   border-radius: 2px;
 }
 
+:global([data-theme="dark"]) .resultSnippet b {
+  background: #453a1f;
+}
+
 .resultMeta {
   display: flex;
   align-items: center;
@@ -123,7 +127,7 @@
 .skeleton {
   height: 80px;
   border-radius: var(--radius-md);
-  background: linear-gradient(90deg, var(--color-bg-secondary) 25%, #e9ecef 50%, var(--color-bg-secondary) 75%);
+  background: linear-gradient(90deg, var(--color-bg-secondary) 25%, var(--color-surface) 50%, var(--color-bg-secondary) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

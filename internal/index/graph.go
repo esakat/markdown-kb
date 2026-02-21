@@ -85,10 +85,14 @@ func (s *Store) BuildGraph() (*GraphData, error) {
 	// Build nodes
 	nodes := make([]GraphNode, len(docs))
 	for i, d := range docs {
+		tags := d.tags
+		if tags == nil {
+			tags = []string{}
+		}
 		nodes[i] = GraphNode{
 			Path:  d.path,
 			Title: d.title,
-			Tags:  d.tags,
+			Tags:  tags,
 		}
 	}
 

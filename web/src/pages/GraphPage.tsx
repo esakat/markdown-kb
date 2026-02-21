@@ -48,7 +48,7 @@ export function GraphPage({}: Props) {
 
   // Filter graph by selected tag
   const filteredNodes = selectedTag
-    ? graph.nodes.filter((n) => n.tags.includes(selectedTag))
+    ? graph.nodes.filter((n) => n.tags && n.tags.includes(selectedTag))
     : graph.nodes;
 
   const filteredPaths = new Set(filteredNodes.map((n) => n.path));

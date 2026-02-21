@@ -37,3 +37,7 @@
 .error {
   color: #dc3545;
 }
+
+:global([data-theme="dark"]) .error {
+  color: #f87171;
+}
