@@ -28,7 +28,7 @@ kb index --format text
 
 ## Features
 
-- **Folder View** - ディレクトリ階層をツリー表示（`/api/v1/tree`）
+- **Folder View** - ディレクトリ階層をツリー表示、タグ連動の絵文字アイコン対応（`/api/v1/tree`）
 - **Document Viewer** - YAML frontmatter + Markdown 本文を解析して表示
 - **Full-text Search** - SQLite FTS5 trigram による BM25 ランキング付き検索
 - **Tag & Metadata Filter** - frontmatter の status / tag でフィルタリング
@@ -126,6 +126,13 @@ wscat -c ws://localhost:3000/api/v1/ws
 title: "DevShot Docs"
 theme: dracula
 font: noto-sans
+tag_icons:
+  - tag: tech
+    emoji: "💻"
+  - tag: idea
+    emoji: "💡"
+  - tag: api
+    emoji: "🔌"
 ```
 
 | フィールド | 説明 | デフォルト |
@@ -133,6 +140,15 @@ font: noto-sans
 | `title` | ヘッダー・ブラウザタブに表示される名前 | ディレクトリ名 |
 | `theme` | カラーテーマ名 | `default` |
 | `font` | フォントプリセット名 | `default` |
+| `tag_icons` | frontmatter タグに応じたサイドバーの絵文字アイコン | なし |
+
+### Tag Icons
+
+`tag_icons` を設定すると、サイドバーのファイルツリーで各ドキュメントの frontmatter タグに応じた絵文字アイコンが表示されます。
+
+- 配列の**先頭から順にマッチ**し、最初にヒットした絵文字が使われます
+- 複数タグが該当する場合は `tag_icons` 配列で先に定義されている方が優先
+- マッチするタグがないファイルはアイコンなしで表示されます
 
 ### CLI フラグで上書き
 
