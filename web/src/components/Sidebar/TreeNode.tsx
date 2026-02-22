@@ -1,15 +1,32 @@
 import { useState } from "preact/hooks";
 import { route } from "preact-router";
-import type { TreeNode as TreeNodeType } from "../../types/api";
+import type { TreeNode as TreeNodeType, TagIcon } from "../../types/api";
 import styles from "./TreeNode.module.css";
 
 interface Props {
   node: TreeNodeType;
   currentPath?: string;
   depth?: number;
+  tagIcons?: TagIcon[];
 }
 
-export function TreeNodeItem({ node, currentPath, depth = 0 }: Props) {
+function getFileIcon(
+  tags: string[] | undefined,
+  tagIcons: TagIcon[] | undefined,
+): string | null {
+  if (!tags || !tagIcons || tagIcons.length === 0) return null;
+  for (const ti of tagIcons) {
+    if (tags.includes(ti.tag)) return ti.emoji;
+  }
+  return null;
+}
+
+export function TreeNodeItem({
+  node,
+  currentPath,
+  depth = 0,
+  tagIcons,
+}: Props) {
   const [expanded, setExpanded] = useState(depth < 1);
   const isDir = node.type === "dir";
   const isActive = !isDir && node.path === currentPath;
@@ -22,6 +39,8 @@ export function TreeNodeItem({ node, currentPath, depth = 0 }: Props) {
     }
   };
 
+  const fileEmoji = !isDir ? getFileIcon(node.tags, tagIcons) : null;
+
   return (
     <li class={styles.item}>
       <button
@@ -31,8 +50,16 @@ export function TreeNodeItem({ node, currentPath, depth = 0 }: Props) {
         data-testid={`tree-node-${node.name}`}
         title={node.title || node.name}
       >
-        <span class={styles.icon}>{isDir ? (expanded ? "▾" : "▸") : "📄"}</span>
-        <span class={styles.name}>{node.title && !isDir ? node.title : node.name}</span>
+        {isDir ? (
+          <span
+            class={`${styles.chevron} ${expanded ? styles.chevronOpen : ""}`}
+          />
+        ) : fileEmoji ? (
+          <span class={styles.fileEmoji}>{fileEmoji}</span>
+        ) : null}
+        <span class={styles.name}>
+          {node.title && !isDir ? node.title : node.name}
+        </span>
       </button>
       {isDir && expanded && node.children && (
         <ul class={styles.children}>
@@ -42,6 +69,7 @@ export function TreeNodeItem({ node, currentPath, depth = 0 }: Props) {
               node={child}
               currentPath={currentPath}
               depth={depth + 1}
+              tagIcons={tagIcons}
             />
           ))}
         </ul>

@@ -3,7 +3,13 @@ export interface TreeNode {
   type: "dir" | "file";
   path?: string;
   title?: string;
+  tags?: string[];
   children?: TreeNode[];
+}
+
+export interface TagIcon {
+  tag: string;
+  emoji: string;
 }
 
 export interface DocumentSummary {
@@ -89,4 +95,5 @@ export interface AppConfig {
   font: string;
   font_url: string;
   font_family: string;
+  tag_icons: TagIcon[];
 }

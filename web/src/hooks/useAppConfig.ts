@@ -9,6 +9,7 @@ const DEFAULT_CONFIG: AppConfig = {
   font: "default",
   font_url: "",
   font_family: "",
+  tag_icons: [],
 };
 
 function applyAccent(theme: string) {

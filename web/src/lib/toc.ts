@@ -14,7 +14,8 @@ export function extractToc(markdown: string): TocEntry[] {
     const text = match[2].trim();
     const id = text
       .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/[^\w\s\u3000-\u9fff\uff00-\uffef-]/g, "")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
       .trim();

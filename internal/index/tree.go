@@ -1,6 +1,7 @@
 package index
 
 import (
+	"encoding/json"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -12,6 +13,7 @@ type TreeNode struct {
 	Type     string      `json:"type"` // "dir" or "file"
 	Path     string      `json:"path,omitempty"`
 	Title    string      `json:"title,omitempty"`
+	Tags     []string    `json:"tags,omitempty"`
 	Children []*TreeNode `json:"children,omitempty"`
 }
 
@@ -19,11 +21,12 @@ type TreeNode struct {
 type PathEntry struct {
 	Path  string
 	Title string
+	Tags  []string
 }
 
-// ListPaths returns all document paths and titles, ordered by path.
+// ListPaths returns all document paths, titles, and tags, ordered by path.
 func (s *Store) ListPaths() ([]PathEntry, error) {
-	rows, err := s.db.Query("SELECT path, title FROM documents ORDER BY path")
+	rows, err := s.db.Query("SELECT path, title, meta FROM documents ORDER BY path")
 	if err != nil {
 		return nil, err
 	}
@@ -32,12 +35,42 @@ func (s *Store) ListPaths() ([]PathEntry, error) {
 	var entries []PathEntry
 	for rows.Next() {
 		var e PathEntry
-		if err := rows.Scan(&e.Path, &e.Title); err != nil {
+		var metaJSON *string
+		if err := rows.Scan(&e.Path, &e.Title, &metaJSON); err != nil {
 			return nil, err
+		}
+		if metaJSON != nil {
+			e.Tags = extractTags(*metaJSON)
 		}
 		entries = append(entries, e)
 	}
 	return entries, rows.Err()
+}
+
+// extractTags parses tags from a JSON meta string.
+func extractTags(metaJSON string) []string {
+	var meta map[string]any
+	if err := json.Unmarshal([]byte(metaJSON), &meta); err != nil {
+		return nil
+	}
+	raw, ok := meta["tags"]
+	if !ok {
+		return nil
+	}
+	arr, ok := raw.([]any)
+	if !ok {
+		return nil
+	}
+	tags := make([]string, 0, len(arr))
+	for _, v := range arr {
+		if s, ok := v.(string); ok {
+			tags = append(tags, s)
+		}
+	}
+	if len(tags) == 0 {
+		return nil
+	}
+	return tags
 }
 
 // BuildTree constructs a nested TreeNode from a flat list of PathEntry.
@@ -61,6 +94,7 @@ func insertNode(parent *TreeNode, parts []string, entry PathEntry) {
 			Type:  "file",
 			Path:  entry.Path,
 			Title: entry.Title,
+			Tags:  entry.Tags,
 		})
 		return
 	}

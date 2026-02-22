@@ -84,11 +84,18 @@ func GetFontPreset(name string) *FontPreset {
 	return nil
 }
 
+// TagIcon maps a frontmatter tag to an emoji icon for the sidebar tree.
+type TagIcon struct {
+	Tag   string `yaml:"tag"   json:"tag"`
+	Emoji string `yaml:"emoji" json:"emoji"`
+}
+
 // RepoConfig holds per-repository configuration loaded from .markdown-kb.yml.
 type RepoConfig struct {
-	Title string `yaml:"title"`
-	Theme string `yaml:"theme"`
-	Font  string `yaml:"font"`
+	Title    string    `yaml:"title"`
+	Theme    string    `yaml:"theme"`
+	Font     string    `yaml:"font"`
+	TagIcons []TagIcon `yaml:"tag_icons"`
 }
 
 // LoadRepoConfig reads .markdown-kb.yml from rootDir.

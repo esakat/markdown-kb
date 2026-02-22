@@ -134,11 +134,12 @@ func queryInt(r *http.Request, key string, defaultVal int) int {
 
 func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 	resp := map[string]any{
-		"title":  s.cfg.Repo.Title,
-		"theme":  s.cfg.Repo.Theme,
-		"themes": config.ValidThemes,
-		"font":   s.cfg.Repo.Font,
-		"fonts":  config.ValidFonts,
+		"title":     s.cfg.Repo.Title,
+		"theme":     s.cfg.Repo.Theme,
+		"themes":    config.ValidThemes,
+		"font":      s.cfg.Repo.Font,
+		"fonts":     config.ValidFonts,
+		"tag_icons": s.cfg.Repo.TagIcons,
 	}
 	if preset := config.GetFontPreset(s.cfg.Repo.Font); preset != nil {
 		resp["font_url"] = preset.URL

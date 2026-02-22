@@ -46,7 +46,7 @@ export function Layout({ currentPath, onSearch, children }: Props) {
         <div
           class={`${styles.sidebarWrapper} ${sidebarOpen ? styles.open : ""}`}
         >
-          <Sidebar currentPath={currentPath} />
+          <Sidebar currentPath={currentPath} tagIcons={appConfig.tag_icons} />
         </div>
         {sidebarOpen && (
           <div class={styles.overlay} onClick={() => setSidebarOpen(false)} />

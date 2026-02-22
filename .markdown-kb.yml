@@ -1,2 +1,13 @@
 title: "Markdown KB"
 theme: gruvbox
+tag_icons:
+  - tag: tech
+    emoji: "💻"
+  - tag: idea
+    emoji: "💡"
+  - tag: go
+    emoji: "🐹"
+  - tag: tutorial
+    emoji: "📖"
+  - tag: api
+    emoji: "🔌"

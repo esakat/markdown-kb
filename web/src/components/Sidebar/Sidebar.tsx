@@ -1,12 +1,14 @@
 import { useTree } from "../../hooks/useTree";
 import { TreeView } from "./TreeView";
+import type { TagIcon } from "../../types/api";
 import styles from "./Sidebar.module.css";
 
 interface Props {
   currentPath?: string;
+  tagIcons?: TagIcon[];
 }
 
-export function Sidebar({ currentPath }: Props) {
+export function Sidebar({ currentPath, tagIcons }: Props) {
   const { tree, loading, error } = useTree();
 
   return (
@@ -17,7 +19,9 @@ export function Sidebar({ currentPath }: Props) {
       <nav class={styles.nav}>
         {loading && <p class={styles.status}>Loading...</p>}
         {error && <p class={styles.error}>{error}</p>}
-        {tree && <TreeView tree={tree} currentPath={currentPath} />}
+        {tree && (
+          <TreeView tree={tree} currentPath={currentPath} tagIcons={tagIcons} />
+        )}
       </nav>
     </aside>
   );
