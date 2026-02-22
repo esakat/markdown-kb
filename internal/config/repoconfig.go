@@ -136,6 +136,9 @@ func LoadRepoConfig(rootDir string) (RepoConfig, error) {
 	if fileCfg.Font != "" && GetFontPreset(fileCfg.Font) != nil {
 		cfg.Font = fileCfg.Font
 	}
+	if len(fileCfg.TagIcons) > 0 {
+		cfg.TagIcons = fileCfg.TagIcons
+	}
 
 	return cfg, nil
 }
